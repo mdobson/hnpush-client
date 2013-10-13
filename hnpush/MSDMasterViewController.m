@@ -29,8 +29,22 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    self.refreshControl = refreshControl;
     self.client = [[ApigeeClient alloc] initWithOrganizationId:@"mdobson" applicationId:@"pushtome-dev"];
     
+    [self.refreshControl addTarget:self action:@selector(refreshObjects) forControlEvents:UIControlEventValueChanged];
+	[self refreshObjects];
+    // Do any additional setup after loading the view, typically from a nib.
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+-(void)refreshObjects {
     ApigeeQuery *query = [[ApigeeQuery alloc] init];
     [query addRequirement:@"order by created desc"];
     [[self.client dataClient] getEntities:@"stories"
@@ -41,17 +55,10 @@
                             } else {
                                 self.stories = response.response[@"entities"];
                                 [self.tableView reloadData];
+                                [self.refreshControl endRefreshing];
                             }
                         }];
-    
-	
-    // Do any additional setup after loading the view, typically from a nib.
-}
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Table View
